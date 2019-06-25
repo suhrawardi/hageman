@@ -1,6 +1,7 @@
 module Main where
 
-import Lib
+import MainUI
+import FRP.UISF
 
 main :: IO ()
-main = someFunc
+main = runMainUI
