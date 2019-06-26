@@ -34,13 +34,14 @@ channelPanel :: UISF (Maybe OutputDeviceID, Double) (Maybe [MidiMessage])
 channelPanel = topDown $ setSize (560, 670) $ title "Channel" $ proc (mo, f) -> do
     (channel, isPlaying, isLearning) <- buttonsPanel -< ()
     mode <- leftRight $ title "Mode" $ radio ["drone", "rhythm"] 0 -< ()
-    tick <- timer -< 1/f
+    d <- title "Dur" $ withDisplay (hiSlider 1 (1, 16) 1) -< ()
 
-    dur <- randPanel -< (f, tick)
-
-    (scale) <- (| leftRight ( do
-      scale <- topDown $ setSize (250, 290) $ title "Scale" $ radio otherScales 0 -< ()
-      returnA -< (scale) ) |)
+    (scale, tick) <- (| leftRight ( do
+      scale <- topDown $ setSize (270, 290) $ title "Scale" $ radio otherScales 0 -< ()
+      tick' <- timer -< 1/f
+      f' <- randPanel -< (f, tick')
+      tick <- timer -< (1/f') * fromIntegral d
+      returnA -< (scale, tick) ) |)
 
     if isLearning
       then do
@@ -48,9 +49,8 @@ channelPanel = topDown $ setSize (560, 670) $ title "Channel" $ proc (mo, f) -> 
       else do
         if isPlaying
           then do
-            returnA -< fmap (const [ANote channel 36 100 01]) tick
-            -- moM' -< adjustMode -< (mode, moM)
-            -- returnA -< moM
+            moM <- adjustMode -< (mode, fmap (const [ANote channel 36 100 01]) tick)
+            returnA -< moM
           else
             returnA -< Nothing
 

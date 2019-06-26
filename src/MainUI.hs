@@ -15,8 +15,11 @@ runMainUI = runMUI (styling "Composer" (2040, 680)) mainUI
 
 mainUI :: UISF () ()
 mainUI = leftRight $ proc _ -> do
-  mo <- selectOutput -< ()
-  f <- title "Dur" $ withDisplay (hiSlider 1 (0, 50) 1) -< ()
+  (mo, f) <- (| topDown ( do
+    mo <- selectOutput -< ()
+    f <- title "Dur" $ withDisplay (hiSlider 1 (1, 16) 1) -< ()
+    returnA -< (mo, f) ) |)
+
   out1 <- channelPanel -< (mo, fromIntegral f)
   out2 <- channelPanel -< (mo, fromIntegral f)
   out3 <- channelPanel -< (mo, fromIntegral f)
