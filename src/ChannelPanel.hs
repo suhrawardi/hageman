@@ -30,6 +30,11 @@ adjustMode = proc (mode, mo) ->
         returnA -< mo
 
 
+asNote :: Int -> Maybe Int -> Int -> Maybe [MidiMessage]
+asNote c Nothing d  = Nothing
+asNote c (Just n) d = Just [ANote c n 100 01]
+
+
 channelPanel :: UISF (Maybe OutputDeviceID, Double) (Maybe [MidiMessage])
 channelPanel = topDown $ setSize (560, 670) $ title "Channel" $ proc (mo, f) -> do
     (channel, isPlaying, isLearning) <- buttonsPanel -< ()
@@ -54,16 +59,6 @@ channelPanel = topDown $ setSize (560, 670) $ title "Channel" $ proc (mo, f) -> 
             returnA -< moM
           else
             returnA -< Nothing
-
-
-asNote :: Int -> Maybe Int -> Int -> Maybe [MidiMessage]
-asNote c Nothing d  = Nothing
-asNote c (Just n) d = Just [ANote c n 100 01]
-
-
-octaves :: [(String, Octave)]
-octaves = [("1", 1), ("2", 2), ("3", 3), ("4", 4), ("5", 5),
-           ("6", 6), ("7", 7), ("8", 8), ("9", 9), ("10", 10)]
 
 
 sGen :: StdGen
