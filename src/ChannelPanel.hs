@@ -36,12 +36,13 @@ channelPanel = topDown $ setSize (560, 670) $ title "Channel" $ proc (mo, f) -> 
     mode <- leftRight $ title "Mode" $ radio ["drone", "rhythm"] 0 -< ()
     d <- title "Dur" $ withDisplay (hiSlider 1 (1, 16) 1) -< ()
 
-    (scale, tick) <- (| leftRight ( do
-      scale <- topDown $ setSize (270, 290) $ title "Scale" $ radio otherScales 0 -< ()
+    (note, tick) <- (| leftRight ( do
+      tuning <- topDown $ setSize (270, 290) $ title "Scale" $ radio otherScales 0 -< ()
       tick' <- timer -< 1/f
       f' <- randPanel -< (f, tick')
       tick <- timer -< (1/f') * fromIntegral d
-      returnA -< (scale, tick) ) |)
+      note <- randNote -< (scale tuning, 3, tick)
+      returnA -< (note, tick) ) |)
 
     if isLearning
       then do
@@ -49,10 +50,15 @@ channelPanel = topDown $ setSize (560, 670) $ title "Channel" $ proc (mo, f) -> 
       else do
         if isPlaying
           then do
-            moM <- adjustMode -< (mode, fmap (const [ANote channel 36 100 01]) tick)
+            moM <- adjustMode -< (mode, asNote channel note 100)
             returnA -< moM
           else
             returnA -< Nothing
+
+
+asNote :: Int -> Maybe Int -> Int -> Maybe [MidiMessage]
+asNote c Nothing d  = Nothing
+asNote c (Just n) d = Just [ANote c n 100 01]
 
 
 octaves :: [(String, Octave)]
