@@ -3,7 +3,6 @@ module Scales (
     otherScales
   ) where
 
-import Data.List (intersect)
 import Euterpea
 import HSoM
 
